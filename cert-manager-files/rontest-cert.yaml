@@ -1,0 +1,18 @@
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: rontest-io-ca
+  namespace: default
+spec:
+  isCA: true
+  duration: 43800h # 5 years
+  commonName: rontest.io
+  secretName: rontest-io-key-pair
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  issuerRef:
+    name: selfsigned
+    kind: ClusterIssuer
+    group: cert-manager.io
