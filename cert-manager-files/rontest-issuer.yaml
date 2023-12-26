@@ -1,0 +1,8 @@
+----
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: rontest-io-ca
+spec:
+  ca:
+    secretName: rontest-io-key-pair                           
