@@ -1,0 +1,4 @@
+1. set nodepool to apps per project
+2. set nodepool to all apps
+
+monday till 12:30

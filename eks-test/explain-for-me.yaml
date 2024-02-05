@@ -1,0 +1,5 @@
+The EC2NodeClass CR lets you fine-tune AWS-specific settings, such as which subnets the nodes will be created in, any mapped block devices, security groups, AMI families, and many more options you can control. An EC2NodeClass is, as we said, AWS-specific; once Karpenter goes multi-cloud, there will probably be GCP and Azure CRs as well.
+
+A NodePool is a more Kubernetes-centered representation of the nodes that should be created.
+For example – should the nodes have any taints? labels? What VM sizes are allowed to be provisioned? Are we OK with spot instances or not? Stuff like that.
+

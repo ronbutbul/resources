@@ -1,0 +1,27 @@
+
+architecture: replicaset
+replicaCount: 3
+## @param useStatefulSet Set to true to use a StatefulSet instead of a Deployment (only when `architecture=standalone`)
+##
+arbiter:
+  enabled: false
+
+useStatefulSet: false
+storageclass: ""
+tolerations:
+  - key: "example.com/special-taint"
+    operator: "Equal"
+        #value: "true"  # Use the taint's value, if the taint was key-value paired.
+    effect: "NoSchedule"      
+persistence:
+  enabled: false
+
+affinity:
+ nodeAffinity:
+   requiredDuringSchedulingIgnoredDuringExecution:
+     nodeSelectorTerms:
+     - matchExpressions:
+       - key: example.com/special-taint
+         operator: In
+         values:
+         - test
