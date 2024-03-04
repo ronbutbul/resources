@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inflate
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: inflate
+  template:
+    metadata:
+      labels:
+        app: inflate
+    spec:
+      terminationGracePeriodSeconds: 0
+      containers:
+      - name: inflate
+        #image: public.ecr.aws/eks-distro-build-tooling/eks-distro-base:latest-al23
+        image: public.ecr.aws/eks-distro/kubernetes/pause:3.7
+        resources:
+          requests:
+            cpu: 1
+      tolerations:
+        - key: "statefulset/special-taint"
+          operator: "Equal"
+              #value: "true"  # Use the taint's value, if the taint was key-value paired.
+          effect: "NoSchedule"      
+      
+      
+      affinity:
+        podAntiAffinity:
+         requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app.kubernetes.io/name
+                    operator: In
+                    values:
+                    - mongodb
+              topologyKey: "kubernetes.io/hostname"
+        nodeAffinity:
+         requiredDuringSchedulingIgnoredDuringExecution:
+           nodeSelectorTerms:
+           - matchExpressions:
+             - key: statefulset/special-taint
+               operator: In
+               values:
+               - stateful

@@ -1,0 +1,12 @@
+1. set nodepool to apps per project
+2. set nodepool to all apps
+
+monday till 12:30
+
+
+git clone https://github.com/aws-samples/serverless-patterns/ 
+cd serverless-patterns/eventbridge-sqs
+
+
+"level":"DEBUG","time":"2024-02-21T10:14:57.916Z","logger":"controller.interruption","message":"removing offering from offerings","commit":"1072d3b","queue":"karpenter-queue","messageKind":"SpotInterruptionKind","nodeclaim":"karpenter-nodepool-rmrsj","action":"CordonAndDrain","node":"ip-10-29-36-120.eu-west-1.compute.internal","reason":"SpotInterruptionKind","instance-type":"t3a.xlarge","zone":"eu-west-1a","capacity-type":"spot","ttl":"3m0s"}
+{"level":"INFO","time":"2024-02-21T10:14:57.935Z","logger":"controller.interruption","message":"initiating delete from interruption message","commit":"1072d3b","queue":"karpenter-queue","messageKind":"SpotInterruptionKind","nodeclaim":"karpenter-nodepool-rmrsj","action":"CordonAndDrain","node":"ip-10-29-36-120.eu-west-1.compute.inte

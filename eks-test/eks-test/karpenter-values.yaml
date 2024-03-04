@@ -1,0 +1,17 @@
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: karpenter.sh/nodepool
+                operator: DoesNotExist
+            - matchExpressions:
+              - key: nodegroup
+                operator: In
+                values:
+                - workers-1         
+            - matchExpressions:
+              - key: nodegroup
+                operator: In
+                values:
+                - workers-2                 

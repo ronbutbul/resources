@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-nodeport-service
+  labels:
+    app: mongodb
+spec:
+  type: NodePort
+  ports:
+    - port: 27017
+      targetPort: 27017
+      nodePort: 30000  # Optional: Specify a nodePort in the range 30000-32767 if you want a specific port.
+      protocol: TCP
+  selector:
+    app: mongodb  # This should match the labels of your MongoDB pods.
