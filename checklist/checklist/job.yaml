@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mongodb-check-pod
+spec:
+  containers:
+  - name: mongodb-check
+    image: artifactory.rafael.co.il:6001/infra/checklist:test1
+    command: ["/bin/sh", "-c"]
+    args:
+      - >
+        python oc-script.py > /var/log/script-output.txt 2>&1;
+        echo "Script completed. Output available in /var/log/script-output.txt";
+        cat /var/log/script-output.txt;
+        sleep 1d;
+    volumeMounts:
+    - name: script-output
+      mountPath: /var/log
+  volumes:
+  - name: script-output
+    emptyDir: {}
+    imagePullSecrets:
+      - name: tsgs-registry
