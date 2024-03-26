@@ -44,6 +44,10 @@
       "name": "app-of-apps",
       "namespace": "rafael-tsgs-cicd-flight"
     }    
-  ]
-  
+  ],
+  "clusterLogForwarderDetails": {
+    "name": "instance",
+    "namespace": "openshift-logging",
+    "targetNamespace": "rafael-tsgs-cicd-flight"
+  }
 }
