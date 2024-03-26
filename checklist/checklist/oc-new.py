@@ -7,6 +7,8 @@ from kafka import KafkaConsumer
 from kafka.errors import KafkaError
 from kubernetes import client, config, dynamic
 from kubernetes.client.rest import ApiException
+import subprocess
+import yaml
 
 # Load the in-cluster configuration
 #config.load_incluster_config()
@@ -127,6 +129,27 @@ def check_application_exists(app_details):
         print(f"An unexpected error occurred while checking Application '{app_name}' in namespace '{app_namespace}': {e}")
 
 
+def get_clf_and_check_namespace(clf_name, namespace, target_namespace):
+    cmd = f"kubectl get clf {clf_name} -n {namespace} -o yaml"
+    process = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+    if process.returncode != 0:
+        print(f"Error executing '{cmd}': {process.stderr}")
+        return
+    
+    clf_yaml = process.stdout
+    clf_data = yaml.safe_load(clf_yaml)
+    
+    found = False
+    for input_item in clf_data.get("spec", {}).get("inputs", []):
+        if "application" in input_item and target_namespace in input_item["application"].get("namespaces", []):
+            print(f"Namespace '{target_namespace}' found in ClusterLogForwarder.")
+            found = True
+            break
+    
+    if not found:
+        print(f"Namespace '{target_namespace}' not found in any 'application' input of ClusterLogForwarder '{clf_name}'.")
+
+
 
 if __name__ == "__main__":
     with open('oc-config.json', 'r') as file:
@@ -161,3 +184,10 @@ if __name__ == "__main__":
     for app_details in application_checks:
         print("\nChecking Application existence...")
         check_application_exists(app_details)        
+
+    clf_details = config.get('clusterLogForwarderDetails', None)
+    if clf_details:
+        print("\nChecking ClusterLogForwarder configuration...")
+        get_clf_and_check_namespace(clf_details["name"], clf_details["namespace"], clf_details["targetNamespace"])
+    else:
+        print("No ClusterLogForwarder configuration found.")
