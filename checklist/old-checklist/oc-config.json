@@ -44,26 +44,6 @@
       "name": "app-of-apps",
       "namespace": "rafael-tsgs-cicd-flight"
     }    
-  ],
-  "clusterLogForwarderDetails": {
-    "name": "instance",
-    "namespace": "openshift-logging",
-    "targetNamespace": "rafael-tsgs-cicd-flight"
-  },
-  "jaegerCheck": {
-    "namespace": "rafael-tsgs-cicd-flight",
-    "expectedJaegerEndpoint": "k8s-rafaelts-jaegerra-db787948a8-ed4d8fd624330e8c.elb.eu-west-1.amazonaws.com:14250"
-  },  
-  "deploymentCheck": {
-    "namespace": "rafael-tsgs-cicd-flight",
-    "partialName": "sealed-secrets"
-  },
-  "prometheusCheck": {
-    "endpoint": "http://prometheus.tsgs-saas-aws.wwest.local/",
-    "jobName": "otel-collector-cicd-flight"
-  },
-  "elasticsearchCheck": {
-    "endpoint": "http://elasticsearch.tsgs-saas-aws.wwest.local",
-    "partialIndexName": "rafael-tsgs-cicd-flight"
-  }
+  ]
+  
 }

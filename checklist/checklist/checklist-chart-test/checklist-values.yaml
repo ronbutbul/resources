@@ -1,0 +1,29 @@
+ApacheImage:
+  repository: artifactory.rafael.co.il:6001/infra/apache
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+  
+AppImage:
+  repository:  artifactory.rafael.co.il:6001/infra/checklist
+  tag: v8
+  pullPolicy: IfNotPresent
+
+volumes:
+  - name: apache-data
+    emptyDir: {}
+  - name: configmap-volume
+    configMap:
+      name: checklist-config
+  - name: empty-dir
+    emptyDir: {}
+imagePullSecrets:
+  - name: tsgs-registry
+
+
+podSecurityContext:
+  runAsUser: 1000

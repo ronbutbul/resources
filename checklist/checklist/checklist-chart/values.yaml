@@ -1,0 +1,104 @@
+# values.yaml
+# Add this to your existing values.yaml
+serviceAccount:
+  create: false  #
+ingress:
+  enabled: false
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 80
+   
+imagePullSecrets:
+  - name: "tsgs-registry"
+
+autoscaling:
+  enabled: false  # Set to true to enable HPA by default
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # Add other HPA settings as needed
+
+containers:
+  script:
+    image: "artifactory.rafael.co.il:6001/infra/checklist"
+    tag: "v6"
+    configMountPath: "/etc/script-config"  # Where the ConfigMap is mounted in the script container
+    outputMountPath: "/var/www/html"  # Where the script writes output; Apache will serve from here
+  apache:
+    image: "artifactory.rafael.co.il:6001/infra/apache"
+    tag: "latest"
+    servePath: "/usr/local/apache2/htdocs"  # Where Apache serves content from
+
+volumes:
+  scriptOutput:
+    name: script-output
+    type: emptyDir
+  configVolume:
+    name: config-volume
+    type: configMap
+
+
+# ConfigMap content from the provided JSON
+configJSON: |
+  {
+    "apps": {
+      "mongodb": {
+        "type": "mongodb",
+        "endpoint": "k8s-rafaelts-mongo5rs-0a7a2695e2-fb36d2b62b7dae0c.elb.eu-west-1.amazonaws.com:27017",
+        "database_name": "tsgsdb",
+        "username": "tsgsuser",
+        "password": "tsgspassword"
+      }
+    },
+    "configMapCheck": {
+      "name": "trusted-ca",
+      "namespace": "rafael-tsgs-cicd-flight"
+    },
+    "secretsChecks": [
+      {
+        "name": "tsgs-registry",
+        "namespace": "rafael-tsgs-cicd-flight"
+      },
+      {
+        "name": "tsinf-reg",
+        "namespace": "rafael-tsgs-cicd-flight"
+      }
+    ],
+    "applicationChecks": [
+      {
+        "name": "zalenium",
+        "namespace": "rafael-tsgs-cicd-flight"
+      },
+      {
+        "name": "locust",
+        "namespace": "rafael-tsgs-cicd-flight"
+      },
+      {
+        "name": "app-of-apps",
+        "namespace": "rafael-tsgs-cicd-flight"
+      }
+    ],
+    "clusterLogForwarderDetails": {
+      "name": "instance",
+      "namespace": "openshift-logging",
+      "targetNamespace": "rafael-tsgs-cicd-flight"
+    },
+    "jaegerCheck": {
+      "namespace": "rafael-tsgs-cicd-flight",
+      "expectedJaegerEndpoint": "k8s-rafaelts-jaegerra-db787948a8-ed4d8fd624330e8c.elb.eu-west-1.amazonaws.com:14250"
+    },
+    "deploymentCheck": {
+      "namespace": "rafael-tsgs-cicd-flight",
+      "partialName": "sealed-secrets"
+    },
+    "prometheusCheck": {
+      "endpoint": "http://prometheus.tsgs-saas-aws.wwest.local/",
+      "jobName": "otel-collector-cicd-flight"
+    },
+    "elasticsearchCheck": {
+      "endpoint": "http://elasticsearch.tsgs-saas-aws.wwest.local",
+      "partialIndexName": "rafael-tsgs-cicd-flight"
+    }
+  }

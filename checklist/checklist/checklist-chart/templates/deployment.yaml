@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "checklist-chart.fullname" . }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "checklist-chart.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "checklist-chart.name" . }}
+    spec:
+      containers:
+        - name: script
+          image: "{{ .Values.containers.script.image }}:{{ .Values.containers.script.tag }}"
+          volumeMounts:
+            - name: script-output
+              mountPath: "{{ .Values.containers.script.outputMountPath }}"
+            - name: config-volume
+              mountPath: "{{ .Values.containers.script.configMountPath }}"
+        - name: apache
+          image: "{{ .Values.containers.apache.image }}:{{ .Values.containers.apache.tag }}"
+          volumeMounts:
+            - name: script-output
+              mountPath: "{{ .Values.containers.apache.servePath }}"
+      volumes:
+        - name: {{ .Values.volumes.scriptOutput.name }}
+          emptyDir: {}
+        - name: {{ .Values.volumes.configVolume.name }}
+          configMap:
+            name: "{{ include "checklist-chart.fullname" . }}-config"

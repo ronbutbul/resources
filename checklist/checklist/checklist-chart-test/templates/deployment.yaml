@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "checklist-chart-test.fullname" . }}
+  labels:
+    {{- include "checklist-chart-test.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "checklist-chart-test.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "checklist-chart-test.labels" . | nindent 8 }}
+	{{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+        sysctls:               # Will add a sysctl in variable to your container
+        - name: net.ipv4.ip_unprivileged_port_start   # You will modify the this parameter 
+          value: "0"      
+      serviceAccountName: {{ include "checklist-chart-test.serviceAccountName" . }}
+      containers:
+        - name: {{ .Chart.Name }}-apache
+          image: "{{ .Values.ApacheImage.repository }}:{{ .Values.ApacheImage.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.ApacheImage.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          volumeMounts:
+            - name: apache-data
+              mountPath: /usr/local/apache2/htdocs  # Apache document root              
+        - name: {{ .Chart.Name }}-app
+          image: "{{ .Values.AppImage.repository }}:{{ .Values.AppImage.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+            - name: apache-data
+              mountPath: /data  # Apache document root  
+            - name: configmap-volume
+              mountPath: /etc/script-config
+            - name: empty-dir
+              mountPath: /usr/local/apache2/logs                                      
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{- with .Values.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

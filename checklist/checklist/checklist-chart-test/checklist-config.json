@@ -6,14 +6,6 @@
       "database_name": "tsgsdb",
       "username": "tsgsuser",
       "password": "tsgspassword"
-    },
-    "kafka": {
-      "type": "kafka",
-      "brokers": [
-        "b-3.rafaeltsgscicdmision.xuubgp.c5.kafka.eu-west-1.amazonaws.com:9092",
-        "b-6.rafaeltsgscicdmision.xuubgp.c5.kafka.eu-west-1.amazonaws.com:9092",
-        "b-5.rafaeltsgscicdmision.xuubgp.c5.kafka.eu-west-1.amazonaws.com:9092"
-      ]
     }
   },
   "configMapCheck": {

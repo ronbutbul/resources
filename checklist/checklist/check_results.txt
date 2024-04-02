@@ -1,0 +1,55 @@
+
+Checking mongodb connectivity...
+MongoDB connection check succeeded for tsgsdb.
+Successfully inserted document into MongoDB. Document ID: 660c11ff0c2754eee8120aa8
+
+Checking ConfigMap existence...
+ConfigMap 'trusted-ca' exists in namespace 'rafael-tsgs-cicd-flight'.
+
+Checking Secret existence...
+Secret 'tsgs-registry' exists in namespace 'rafael-tsgs-cicd-flight'.
+
+Checking Secret existence...
+Secret 'tsinf-reg' exists in namespace 'rafael-tsgs-cicd-flight'.
+
+Checking Application existence...
+Application 'zalenium' exists in namespace 'rafael-tsgs-cicd-flight'.
+
+Checking Application existence...
+Application 'locust' exists in namespace 'rafael-tsgs-cicd-flight'.
+
+Checking Application existence...
+Application 'app-of-apps' exists in namespace 'rafael-tsgs-cicd-flight'.
+
+Checking ClusterLogForwarder configuration...
+Namespace 'rafael-tsgs-cicd-flight' found in ClusterLogForwarder.
+
+Checking Jaeger endpoint configuration...
+Found 2 OpenTelemetryCollector(s) in namespace 'rafael-tsgs-cicd-flight'.
+Jaeger endpoint 'k8s-rafaelts-jaegerra-db787948a8-ed4d8fd624330e8c.elb.eu-west-1.amazonaws.com:14250' matches expected value in namespace 'rafael-tsgs-cicd-flight'.
+
+Checking deployment status...
+Deployment 'ss-cicd-flight-sealed-secrets' in namespace 'rafael-tsgs-cicd-flight' is up and running.
+
+Querying Prometheus API at: http://prometheus.tsgs-saas-aws.wwest.local//api/v1/targets
+Successfully fetched data from Prometheus API.
+Searching for job: otel-collector-cicd-flight
+Job 'otel-collector-cicd-flight' found with state: up.
+
+Querying Elasticsearch directly at: http://elasticsearch.tsgs-saas-aws.wwest.local/_cat/indices/rafael-tsgs-cicd-flight*?format=json
+Indices containing 'rafael-tsgs-cicd-flight' found:
+- rafael-tsgs-cicd-flight-jaeger-span-2024-03-27
+- rafael-tsgs-cicd-flight-jaeger-span-2024-03-26
+- rafael-tsgs-cicd-flight-jaeger-span-2024-03-29
+- rafael-tsgs-cicd-flight-jaeger-span-2024-03-28
+- rafael-tsgs-cicd-flight-jaeger-span-2024-03-30
+- rafael-tsgs-cicd-flight-jaeger-span-2024-04-02
+- rafael-tsgs-cicd-flight-jaeger-service-2024-04-01
+- rafael-tsgs-cicd-flight-jaeger-span-2024-04-01
+- rafael-tsgs-cicd-flight-jaeger-span-2024-03-31
+- rafael-tsgs-cicd-flight-jaeger-service-2024-03-31
+- rafael-tsgs-cicd-flight-jaeger-service-2024-03-26
+- rafael-tsgs-cicd-flight-jaeger-service-2024-04-02
+- rafael-tsgs-cicd-flight-jaeger-service-2024-03-29
+- rafael-tsgs-cicd-flight-jaeger-service-2024-03-27
+- rafael-tsgs-cicd-flight-jaeger-service-2024-03-28

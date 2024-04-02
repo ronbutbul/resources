@@ -3,19 +3,22 @@ import socket
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 import requests
-from kafka import KafkaConsumer
-from kafka.errors import KafkaError
 from kubernetes import client, config, dynamic
 from kubernetes.client.rest import ApiException
 import subprocess
 import yaml
-
+import time
+import sys
+import io
+from kubernetes.dynamic import DynamicClient
 # Load the in-cluster configuration
 #config.load_incluster_config()
 config.load_kube_config()
 
 v1 = client.CoreV1Api()
 #apps_v1 = client.AppsV1Api()
+
+#dyn_client = DynamicClient(client.ApiClient())
 
 dyn_client = dynamic.DynamicClient(
     client.ApiClient(configuration=config.load_kube_config())
@@ -59,21 +62,6 @@ def check_mongodb(app_details):
         print(f"MongoDB connection check failed: {e}")
     except Exception as e:
         print(f"MongoDB test operation failed: {e}")
-
-
-
-def check_kafka(app_details):
-    """Checks connectivity to Kafka brokers."""
-    brokers = app_details.get('brokers')
-    
-    try:
-        # Attempt to create a Kafka consumer to list topics, which tests connectivity
-        consumer = KafkaConsumer(bootstrap_servers=brokers, client_id='test_consumer', request_timeout_ms=10000)
-        topics = consumer.topics()
-        print(f"Successfully connected to Kafka brokers: {brokers}. And there are Topics available.")
-        consumer.close()
-    except KafkaError as e:
-        print(f"Failed to connect to Kafka brokers {brokers}: {e}")
 
 
 def check_config_map_exists(config_map_details):
@@ -151,7 +139,7 @@ def get_clf_and_check_namespace(clf_name, namespace, target_namespace):
 
 
 def check_jaeger_endpoint_from_otc(namespace, expected_jaeger_endpoint):
-    cmd = f"oc get opentelemetrycollector -n {namespace} -o yaml"
+    cmd = f"kubectl get opentelemetrycollector -n {namespace} -o yaml"
     process = subprocess.run(cmd, shell=True, capture_output=True, text=True)
     if process.returncode != 0:
         print(f"Error executing '{cmd}': {process.stderr}")
@@ -255,72 +243,84 @@ def check_elasticsearch_index_existence(endpoint, partial_index_name):
     except requests.exceptions.RequestException as e:
         print(f"Request failed: {e}")
 
+ 
+
+if __name__ == "__main__":  
+    while True:  
+       with open('prototype-config.json', 'r') as file:
+           config = json.load(file)
+
+       # Open the output file in write mode to overwrite existing content
+       with open('check_results.txt', 'w') as output_file:
+           # Redirect print statements to write to the output file instead of the screen
+           original_stdout = sys.stdout  # Save a reference to the original standard output
+           sys.stdout = output_file  # Change the standard output to the file we created.
+
+           # Handle apps checks
+           apps = config.get('apps', {})
+           for app_name, app_details in apps.items():
+               app_type = app_details.get('type')
+               print(f"\nChecking {app_name} connectivity...")
+          
+               if app_type == "mongodb":
+                   check_mongodb(app_details)
+          
+           # ConfigMap check
+           config_map_details = config.get('configMapCheck', None)
+           if config_map_details:
+               print("\nChecking ConfigMap existence...")
+               check_config_map_exists(config_map_details)
+           else:
+               print("No ConfigMapCheck configuration found.")
+          
+           secrets_checks = config.get('secretsChecks', [])
+           for secret_details in secrets_checks:
+               print("\nChecking Secret existence...")
+               check_secret_exists(secret_details)
+          
+           application_checks = config.get('applicationChecks', [])
+           for app_details in application_checks:
+               print("\nChecking Application existence...")
+               check_application_exists(app_details)        
+          
+           clf_details = config.get('clusterLogForwarderDetails', None)
+           if clf_details:
+               print("\nChecking ClusterLogForwarder configuration...")
+               get_clf_and_check_namespace(clf_details["name"], clf_details["namespace"], clf_details["targetNamespace"])
+           else:
+               print("No ClusterLogForwarder configuration found.")
+          
+           jaeger_check_config = config.get('jaegerCheck', None)
+           if jaeger_check_config:
+               print("\nChecking Jaeger endpoint configuration...")
+               check_jaeger_endpoint_from_otc(jaeger_check_config["namespace"], jaeger_check_config["expectedJaegerEndpoint"])
+          
+          
+           deployment_check_config = config.get('deploymentCheck', None)
+           if deployment_check_config:
+               print("\nChecking deployment status...")
+               check_deployment_status(deployment_check_config["namespace"], deployment_check_config["partialName"])        
+          
+           prometheus_check_config = config.get('prometheusCheck', {})
+           if prometheus_check_config:
+               prometheus_endpoint = prometheus_check_config.get("endpoint")
+               job_name = prometheus_check_config.get("jobName")
+               check_prometheus_target_by_job(prometheus_endpoint, job_name)
+           else:
+               print("No Prometheus check configuration found.")
+          
+           es_check_config = config.get('elasticsearchCheck', {})
+           if es_check_config:
+               es_endpoint = es_check_config.get("endpoint")
+               partial_index_name = es_check_config.get("partialIndexName")
+               check_elasticsearch_index_existence(es_endpoint, partial_index_name)
+           else:
+               print("No Elasticsearch check configuration found.")
+           time.sleep(10)    
+
+           sys.stdout = original_stdout  # Reset the standard output to its original value
+
+       print("Checks completed and results written to check_results.txt")
 
 
-if __name__ == "__main__":
-    with open('oc-config.json', 'r') as file:
-        config = json.load(file)
-
-    # Handle apps checks
-    apps = config.get('apps', {})
-    for app_name, app_details in apps.items():
-        app_type = app_details.get('type')
-        print(f"\nChecking {app_name} connectivity...")
-
-        if app_type == "mongodb":
-            check_mongodb(app_details)
-
-        elif app_type == "kafka":
-            check_kafka(app_details)
-
-    # ConfigMap check
-    config_map_details = config.get('configMapCheck', None)
-    if config_map_details:
-        print("\nChecking ConfigMap existence...")
-        check_config_map_exists(config_map_details)
-    else:
-        print("No ConfigMapCheck configuration found.")
-
-    secrets_checks = config.get('secretsChecks', [])
-    for secret_details in secrets_checks:
-        print("\nChecking Secret existence...")
-        check_secret_exists(secret_details)
-
-    application_checks = config.get('applicationChecks', [])
-    for app_details in application_checks:
-        print("\nChecking Application existence...")
-        check_application_exists(app_details)        
-
-    clf_details = config.get('clusterLogForwarderDetails', None)
-    if clf_details:
-        print("\nChecking ClusterLogForwarder configuration...")
-        get_clf_and_check_namespace(clf_details["name"], clf_details["namespace"], clf_details["targetNamespace"])
-    else:
-        print("No ClusterLogForwarder configuration found.")
-
-    jaeger_check_config = config.get('jaegerCheck', None)
-    if jaeger_check_config:
-        print("\nChecking Jaeger endpoint configuration...")
-        check_jaeger_endpoint_from_otc(jaeger_check_config["namespace"], jaeger_check_config["expectedJaegerEndpoint"])
-
-
-    deployment_check_config = config.get('deploymentCheck', None)
-    if deployment_check_config:
-        print("\nChecking deployment status...")
-        check_deployment_status(deployment_check_config["namespace"], deployment_check_config["partialName"])        
-
-    prometheus_check_config = config.get('prometheusCheck', {})
-    if prometheus_check_config:
-        prometheus_endpoint = prometheus_check_config.get("endpoint")
-        job_name = prometheus_check_config.get("jobName")
-        check_prometheus_target_by_job(prometheus_endpoint, job_name)
-    else:
-        print("No Prometheus check configuration found.")
-
-    es_check_config = config.get('elasticsearchCheck', {})
-    if es_check_config:
-        es_endpoint = es_check_config.get("endpoint")
-        partial_index_name = es_check_config.get("partialIndexName")
-        check_elasticsearch_index_existence(es_endpoint, partial_index_name)
-    else:
-        print("No Elasticsearch check configuration found.")
+       time.sleep(300)    

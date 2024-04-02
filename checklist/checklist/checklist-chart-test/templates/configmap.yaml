@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: checklist-config
+data:
+  config.json: |-
+{{- with .Files.Get "checklist-config.json" }}
+{{ . | indent 8 }}
+{{- end }}

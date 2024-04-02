@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "checklist-chart.fullname" . }}-config
+data:
+  config.json: |
+    {{ .Values.configJSON | indent 4 }}
