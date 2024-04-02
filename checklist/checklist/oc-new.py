@@ -150,6 +150,7 @@ def get_clf_and_check_namespace(clf_name, namespace, target_namespace):
         print(f"Namespace '{target_namespace}' not found in any 'application' input of ClusterLogForwarder '{clf_name}'.")
 
 
+<<<<<<< HEAD
 def check_jaeger_endpoint_from_otc(namespace, expected_jaeger_endpoint):
     cmd = f"oc get opentelemetrycollector -n {namespace} -o yaml"
     process = subprocess.run(cmd, shell=True, capture_output=True, text=True)
@@ -256,6 +257,8 @@ def check_elasticsearch_index_existence(endpoint, partial_index_name):
         print(f"Request failed: {e}")
 
 
+=======
+>>>>>>> b1586bf4481d19760dc042447fb782b63bc6ef29
 
 if __name__ == "__main__":
     with open('oc-config.json', 'r') as file:
@@ -297,6 +300,7 @@ if __name__ == "__main__":
         get_clf_and_check_namespace(clf_details["name"], clf_details["namespace"], clf_details["targetNamespace"])
     else:
         print("No ClusterLogForwarder configuration found.")
+<<<<<<< HEAD
 
     jaeger_check_config = config.get('jaegerCheck', None)
     if jaeger_check_config:
@@ -324,3 +328,5 @@ if __name__ == "__main__":
         check_elasticsearch_index_existence(es_endpoint, partial_index_name)
     else:
         print("No Elasticsearch check configuration found.")
+=======
+>>>>>>> b1586bf4481d19760dc042447fb782b63bc6ef29

@@ -1,3 +1,0 @@
-
-Checking MongoDB connectivity for mongodb...
-MongoDB connection check succeeded for tsgsdb.

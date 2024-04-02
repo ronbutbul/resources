@@ -49,6 +49,7 @@
     "name": "instance",
     "namespace": "openshift-logging",
     "targetNamespace": "rafael-tsgs-cicd-flight"
+<<<<<<< HEAD
   },
   "jaegerCheck": {
     "namespace": "rafael-tsgs-cicd-flight",
@@ -65,5 +66,7 @@
   "elasticsearchCheck": {
     "endpoint": "http://elasticsearch.tsgs-saas-aws.wwest.local",
     "partialIndexName": "rafael-tsgs-cicd-flight"
+=======
+>>>>>>> b1586bf4481d19760dc042447fb782b63bc6ef29
   }
 }
